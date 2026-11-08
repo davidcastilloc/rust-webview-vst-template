@@ -48,6 +48,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx --yes -p semantic-release@24 `
+            -p conventional-changelog-conventionalcommits@8 `
             -p @semantic-release/commit-analyzer@13 `
             -p @semantic-release/release-notes-generator@14 `
             -p @semantic-release/changelog@6 `
