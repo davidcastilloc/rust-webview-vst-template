@@ -1,0 +1,16 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/dsp_core",
+    "crates/base_plugin_core",
+    "crates/base_plugin_webview",
+    "crates/base_plugin_standalone",
+    "crates/studio_bus_comp",
+    "crates/xtask",
+]
+
+[workspace.package]
+version = "1.0.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/davidcastilloc/rust-webview-vst-template"

@@ -1,0 +1,48 @@
+name: CI & 4-Gate Certification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  certify-and-build:
+    name: 4-Gate Audit, Tests & Bundle (Windows x64)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run Formal 4-Gate Architecture Certification Audit
+        shell: pwsh
+        run: ./scripts/audit_plugin_architecture.ps1
+
+      - name: Run Clippy Zero-Warnings Check
+        run: cargo clippy --workspace --all-targets --no-deps -- -D warnings
+
+      - name: Run Full Workspace Test Suite
+        run: cargo test --workspace
+
+      - name: Build Standalone QA App & Bundle VST3/CLAP
+        run: |
+          cargo build --release -p studio_bus_comp --bin studio_bus_comp_app
+          cargo run --package xtask -- bundle studio_bus_comp --release
+
+      - name: Upload VST3, CLAP & Standalone Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: studio-bus-comp-windows-x64
+          path: |
+            target/release/studio_bus_comp_app.exe
+            target/bundled/studio_bus_comp.vst3
+            target/bundled/studio_bus_comp.clap
