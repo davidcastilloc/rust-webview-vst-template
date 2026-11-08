@@ -1,6 +1,6 @@
 [package]
 name = "studio_bus_comp"
-version = "1.22.0"
+version = "1.0.0"
 edition = "2021"
 license = "MIT"
 description = "Reference VCA Bus Compressor, Sidechain HPF, and Tape Saturator VST3/CLAP/Standalone plugin built 100% on the decoupled base_plugin_core + dsp_core stack with zero synth/AI coupling."

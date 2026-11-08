@@ -1,3 +1,15 @@
+## 1.0.0 (2026-11-08)
+
+### Features
+
+* **docs:** add visual identity, semantic-release, GitHub Pages portal, and llms.txt vibe-coding kit ([ea515a1](https://github.com/davidcastilloc/rust-webview-vst-template/commit/ea515a131476026c46ad9cfeae4c8dfcc778aa2f))
+* initial release of decoupled Rust + WebView + audio-ui VST3/CLAP/Standalone template & SDK ([73710bb](https://github.com/davidcastilloc/rust-webview-vst-template/commit/73710bb80a271c3a37a2af8388a6de951dce868a))
+
+### Bug Fixes
+
+* **ci:** allow vst3_com macro trailing semicolon lint across Rust compiler versions ([88b0b60](https://github.com/davidcastilloc/rust-webview-vst-template/commit/88b0b60c481b6ada15ce85e6948fdf6dd60e81a9))
+* **release:** include conventional-changelog-conventionalcommits preset in npx runner ([9bb3999](https://github.com/davidcastilloc/rust-webview-vst-template/commit/9bb3999460d104ea7d6d1ba9f89dcf37218a78c5))
+
 # Changelog
 
 All notable changes to this project will be documented in this file. This file is automatically maintained by [semantic-release](https://github.com/semantic-release/semantic-release).
