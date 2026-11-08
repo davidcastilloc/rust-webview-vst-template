@@ -214,8 +214,69 @@ fn main() {{
     Ok(())
 }
 
+fn update_cargo_toml_version_str(content: &str, new_version: &str) -> String {
+    let mut in_pkg = false;
+    let mut out = String::with_capacity(content.len() + 16);
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with('[') && trimmed.ends_with(']') {
+            in_pkg = trimmed == "[package]" || trimmed == "[workspace.package]";
+        }
+        if in_pkg && trimmed.starts_with("version") && trimmed.contains('=') {
+            out.push_str(&format!("version = \"{}\"\n", new_version));
+        } else {
+            out.push_str(line);
+            out.push('\n');
+        }
+    }
+    out
+}
+
+fn run_set_version(new_version: &str) -> nih_plug_xtask::Result<()> {
+    let clean_ver = new_version.trim().trim_start_matches('v');
+    let manifests = [
+        "Cargo.toml",
+        "crates/dsp_core/Cargo.toml",
+        "crates/base_plugin_core/Cargo.toml",
+        "crates/base_plugin_webview/Cargo.toml",
+        "crates/base_plugin_standalone/Cargo.toml",
+        "crates/studio_bus_comp/Cargo.toml",
+        "crates/xtask/Cargo.toml",
+    ];
+    for manifest in manifests {
+        let path = Path::new(manifest);
+        if path.exists() {
+            let content = fs::read_to_string(path)?;
+            let updated = update_cargo_toml_version_str(&content, clean_ver);
+            fs::write(path, updated)?;
+            println!("[XTASK VERSION] Updated {} -> {}", manifest, clean_ver);
+        }
+    }
+    let pkg_json = Path::new("packages/base-plugin-ui/package.json");
+    if pkg_json.exists() {
+        let content = fs::read_to_string(pkg_json)?;
+        let mut out = String::new();
+        for line in content.lines() {
+            if line.trim_start().starts_with("\"version\":") {
+                out.push_str(&format!("  \"version\": \"{}\",\n", clean_ver));
+            } else {
+                out.push_str(line);
+                out.push('\n');
+            }
+        }
+        fs::write(pkg_json, out)?;
+        println!("[XTASK VERSION] Updated packages/base-plugin-ui/package.json -> {}", clean_ver);
+    }
+    Ok(())
+}
+
 fn main() -> nih_plug_xtask::Result<()> {
     let args: Vec<String> = env::args().skip(1).collect();
+    if args.first().map(|s| s.as_str()) == Some("set-version") {
+        if let Some(ver) = args.get(1) {
+            return run_set_version(ver);
+        }
+    }
     if args.first().map(|s| s.as_str()) == Some("init-template") {
         return run_init_template(&args[1..]);
     }

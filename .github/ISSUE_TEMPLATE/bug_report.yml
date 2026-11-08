@@ -1,0 +1,33 @@
+name: Reporte de Bug (DSP / WebView / DAW)
+description: Reporta un fallo en dsp_core, base_plugin_webview, o compatibilidad con un DAW (Ableton, Reaper, FL Studio, Bitwig)
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: Crate o Componente Afectado
+      options:
+        - crates/dsp_core (Filtros, Dinámica, FX, Primitivas)
+        - crates/base_plugin_core (DspEngine, AtomicParamBank, Contract Harness)
+        - crates/base_plugin_webview (GenericWebViewEditor, IPC, Win32/macOS)
+        - crates/base_plugin_standalone (Ejecutable Standalone)
+        - packages/base-plugin-ui (@plugin-base/ui-bridge / 6 Hardware Skins)
+        - crates/studio_bus_comp (Plugin de Referencia)
+        - crates/xtask (Scaffolding / Bundler)
+    validations:
+      required: true
+  - type: input
+    id: daw_env
+    attributes:
+      label: Entorno / DAW y Sistema Operativo
+      placeholder: "Ej. Windows 11 x64 + Ableton Live 12 (VST3) / Reaper 7 (CLAP) / Standalone .exe"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Descripción y Pasos para Reproducir
+      placeholder: "Describe cómo reproducir el comportamiento inesperado..."
+    validations:
+      required: true

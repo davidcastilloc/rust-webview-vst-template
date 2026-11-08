@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Open Audio Stack — Rust + WebView2/WebKit + @audio-ui VST3/CLAP SDK</title>
+  <meta name="description" content="Open-source SDK and template for building commercial-grade VST3, CLAP, and Standalone audio plugins with Rust (nih-plug), Serverless WebView2/WebKit (wry), and 6-Skin @audio-ui interfaces. AI & Vibe-Coder Ready." />
+  <style>
+    :root {
+      --bg: #08090c;
+      --panel: #11131a;
+      --panel-alt: #161923;
+      --border: #232736;
+      --text: #eef0f6;
+      --muted: #949ab0;
+      --amber: #f59e0b;
+      --cyan: #06b6d4;
+      --green: #10b981;
+      --mono: "JetBrains Mono", "Fira Code", Consolas, monospace;
+      --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: var(--cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .container { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+    header.nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8, 9, 12, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      font-size: 15px;
+      color: var(--text);
+    }
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--amber);
+      box-shadow: 0 0 12px var(--amber);
+    }
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .nav-links a { color: var(--muted); transition: color 0.15s; }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+    .hero {
+      padding: 48px 0 36px;
+      text-align: center;
+    }
+    .hero-banner {
+      width: 100%;
+      max-height: 440px;
+      object-fit: cover;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.75);
+      margin-bottom: 28px;
+    }
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .badge.gold { border-color: var(--amber); color: var(--amber); }
+    .badge.ai { border-color: var(--cyan); color: var(--cyan); }
+    h1 {
+      font-size: clamp(28px, 4vw, 46px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+    .subtitle {
+      max-width: 780px;
+      margin: 0 auto 28px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+    .cta-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      border: 1px solid var(--border);
+      background: var(--panel-alt);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn:hover { border-color: var(--cyan); text-decoration: none; transform: translateY(-1px); }
+    .btn.primary {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #08090c;
+      border: none;
+    }
+    section { padding: 48px 0; border-top: 1px solid var(--border); }
+    h2 { font-size: 26px; margin-bottom: 10px; letter-spacing: -0.01em; }
+    .section-lead { color: var(--muted); margin-bottom: 24px; font-size: 15px; }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+    }
+    .card h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card p { color: var(--muted); font-size: 14px; margin-bottom: 12px; }
+    pre {
+      background: #050608;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      color: #d1d5db;
+      position: relative;
+    }
+    .copy-btn {
+      background: var(--panel-alt);
+      color: var(--cyan);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .copy-btn:hover { border-color: var(--cyan); }
+    .skin-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .skin-pill {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .skin-pill.active {
+      border-color: var(--amber);
+      color: var(--amber);
+      background: rgba(245, 158, 11, 0.12);
+    }
+    .demo-frame {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 16px;
+      text-align: center;
+      transition: all 0.25s;
+    }
+    .knob-card {
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 14px 10px;
+    }
+    .knob-card label {
+      display: block;
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+      opacity: 0.8;
+    }
+    .knob-card input[type="range"] { width: 100%; accent-color: var(--amber); cursor: pointer; }
+    .knob-val { font-family: var(--mono); font-size: 13px; font-weight: 700; margin-top: 6px; color: var(--amber); }
+    footer {
+      padding: 36px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="container nav-inner">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span>OPEN AUDIO STACK</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#interactive-demo">6-Skin Live Demo</a>
+        <a href="#vibe-coding">Vibe-Coding &amp; LLMs.txt</a>
+        <a href="#architecture">4-Layer Architecture</a>
+        <a href="#quickstart">Quickstart</a>
+        <a href="https://github.com/davidcastilloc/rust-webview-vst-template">GitHub Repo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="hero">
+      <img class="hero-banner" src="assets/hero-banner.jpg" alt="Open Audio Stack — Rust + WebView2 + @audio-ui VST3/CLAP SDK" />
+      <div class="badges">
+        <span class="badge gold">TEMPLATE CERTIFIED GOLD (4/4 GATES)</span>
+        <span class="badge ai">AI &amp; VIBE-CODER READY (llms.txt + llms-full.txt)</span>
+        <span class="badge">VST3 + CLAP + STANDALONE</span>
+        <span class="badge">ZERO-ALLOCATION DSP</span>
+        <span class="badge">SEMANTIC RELEASE</span>
+      </div>
+      <h1>Build Hardware-Grade VST3 &amp; CLAP Plugins with Rust &amp; WebView</h1>
+      <p class="subtitle">
+        A production-proven, real-time safe audio plugin SDK combining <strong>Rust (<code>nih-plug</code>)</strong>,
+        <strong>Serverless WebView2/WebKit (<code>wry</code>)</strong>, and <strong>6-Skin <code>@audio-ui</code> interfaces</strong>.
+        Engineered for both seasoned DSP developers and AI Vibe Coders.
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" href="https://github.com/davidcastilloc/rust-webview-vst-template/generate">Use This Template on GitHub</a>
+        <a class="btn" href="llms.txt">View llms.txt</a>
+        <a class="btn" href="llms-full.txt">View llms-full.txt (Full AI Context)</a>
+        <a class="btn" href="VIBE_CODING_PROMPTS.md">Vibe-Coding Prompts</a>
+      </div>
+    </div>
+
+    <section id="interactive-demo">
+      <h2>Interactive 6-Skin Hardware Preview (`studio_bus_comp`)</h2>
+      <p class="section-lead">
+        Every plugin created with this template ships with 6 switchable hardware aesthetics out of the box (`minimal`, `dark`, `retro`, `synth70`, `gunmetal`, `phosphor`) verified by automated contract tests.
+      </p>
+      <div class="skin-bar" id="skin-selector">
+        <button class="skin-pill active" onclick="setSkin('dark', '#11131a', '#f59e0b', this)">Dark Studio</button>
+        <button class="skin-pill" onclick="setSkin('minimal', '#f4f4f6', '#2563eb', this)">Minimal Lab</button>
+        <button class="skin-pill" onclick="setSkin('retro', '#261c14', '#eab308', this)">Retro Bakelite</button>
+        <button class="skin-pill" onclick="setSkin('synth70', '#1c1917', '#f97316', this)">Synth '70s</button>
+        <button class="skin-pill" onclick="setSkin('gunmetal', '#181c24', '#38bdf8', this)">Gunmetal Rack</button>
+        <button class="skin-pill" onclick="setSkin('phosphor', '#06140b', '#22c55e', this)">Phosphor CRT</button>
+      </div>
+      <div class="demo-frame" id="demo-rack">
+        <div class="knob-card">
+          <label>Threshold</label>
+          <input type="range" min="-48" max="0" value="-18" oninput="updateKnob(this, ' dB')" />
+          <div class="knob-val">-18 dB</div>
+        </div>
+        <div class="knob-card">
+          <label>Ratio</label>
+          <input type="range" min="1" max="20" value="4" oninput="updateKnob(this, ':1')" />
+          <div class="knob-val">4:1</div>
+        </div>
+        <div class="knob-card">
+          <label>Attack</label>
+          <input type="range" min="1" max="100" value="10" oninput="updateKnob(this, ' ms')" />
+          <div class="knob-val">10 ms</div>
+        </div>
+        <div class="knob-card">
+          <label>Release</label>
+          <input type="range" min="20" max="1000" value="120" oninput="updateKnob(this, ' ms')" />
+          <div class="knob-val">120 ms</div>
+        </div>
+        <div class="knob-card">
+          <label>Makeup / Drive</label>
+          <input type="range" min="0" max="24" value="6" oninput="updateKnob(this, ' dB')" />
+          <div class="knob-val">+6 dB</div>
+        </div>
+        <div class="knob-card">
+          <label>Parallel Mix</label>
+          <input type="range" min="0" max="100" value="100" oninput="updateKnob(this, '%')" />
+          <div class="knob-val">100%</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="vibe-coding">
+      <h2>AI Agent &amp; Vibe-Coder First-Class Support (`llms.txt`)</h2>
+      <p class="section-lead">
+        Want to build a custom Saturator, Mastering EQ, Chorus, or Synthesizer using Claude Code, Cursor, Antigravity, or Windsurf?
+        We provide machine-readable context files (`llms.txt`, `llms-full.txt`, `CLAUDE.md`, `.cursorrules`) and mathematical contract gates so AI agents never produce dummy knobs or audio-thread glitches.
+      </p>
+      <div class="grid-3">
+        <div class="card">
+          <h3>
+            <span>1. Analog Tube Saturator Prompt</span>
+            <button class="copy-btn" onclick="copyText('prompt-saturator', this)">Copy Prompt</button>
+          </h3>
+          <p>Scaffolds a stereo asymmetric tube saturator with tape high-cut, bass warmth shelf, and 6 skins.</p>
+          <pre id="prompt-saturator">Read llms.txt and llms-full.txt.
+Run `cargo run --package xtask -- new-plugin --name "Velvet Warmth" --vendor "VibeAudio" --id "com.vibeaudio.velvetwarmth"` and implement a stereo tube &amp; tape saturator using `SoftClipper::process_asymmetric_tube` and `BiquadFilter`. Verify all 4 gates with `scripts/audit_plugin_architecture.ps1`.</pre>
+        </div>
+
+        <div class="card">
+          <h3>
+            <span>2. 4-Band Mastering EQ Prompt</span>
+            <button class="copy-btn" onclick="copyText('prompt-eq', this)">Copy Prompt</button>
+          </h3>
+          <p>Builds a 4-Band Stereo Parametric Mastering Equalizer with live SVG frequency response curve.</p>
+          <pre id="prompt-eq">Read llms.txt and llms-full.txt.
+Run `cargo run --package xtask -- new-plugin --name "Prism Mastering EQ" --vendor "VibeAudio" --id "com.vibeaudio.prismeq"` and chain 4 stereo pairs of `dsp_core::BiquadFilter` (HighPass, LowShelf, Peaking, HighShelf) with a 6-skin interactive SVG EQ curve. Prove all parameters in `declare_plugin_contract!`.</pre>
+        </div>
+
+        <div class="card">
+          <h3>
+            <span>3. Stereo BBD Chorus Prompt</span>
+            <button class="copy-btn" onclick="copyText('prompt-chorus', this)">Copy Prompt</button>
+          </h3>
+          <p>Creates a bucket-brigade stereo chorus using stack-allocated Hermite `DelayLine` interpolation.</p>
+          <pre id="prompt-chorus">Read llms.txt and llms-full.txt.
+Run `cargo run --package xtask -- new-plugin --name "Dimension BBD" --vendor "VibeAudio" --id "com.vibeaudio.dimensionbbd"` using two `dsp_core::DelayLine&lt;8192&gt;` buffers modulated in quadrature stereo phase, with a 6-skin Lissajous vectorscope UI.</pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <h2>4-Layer Shared SDK Architecture &amp; 4-Gate Certification</h2>
+      <p class="section-lead">
+        All plugins share a battle-tested core (`dsp_core`, `base_plugin_core`, `base_plugin_webview`) while keeping 100% of their custom DSP and UI inside `crates/&lt;your_plugin&gt;`.
+      </p>
+      <div class="grid-3">
+        <div class="card">
+          <h3>Layer 1: `crates/dsp_core`</h3>
+          <p>Real-time safe, zero-allocation building blocks: `BiquadFilter`, `OnePoleSmoother`, `EnvelopeFollower`, `SoftClipper`, and stack-allocated `DelayLine&lt;N&gt;` with 4-point Hermite interpolation.</p>
+        </div>
+        <div class="card">
+          <h3>Layer 2: `crates/base_plugin_core`</h3>
+          <p>Defines `DspEngine`, lock-free `TelemetryRing` (atomic L/R Peak, RMS &amp; Gain Reduction), `PresetBank`, and the `declare_plugin_contract!` test generator macro.</p>
+        </div>
+        <div class="card">
+          <h3>Layer 3: `crates/base_plugin_webview`</h3>
+          <p>Serverless `wry` WebView2/WebKit host with Win32 `HWND_MESSAGE` timer pump (`SetTimer` + `PeekMessageW`) and per-executable User Data Folder isolation.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="quickstart">
+      <h2>Quickstart &amp; Upstream SDK Auto-Sync</h2>
+      <p class="section-lead">Create a new plugin in 60 seconds and pull future SDK improvements anytime with zero merge conflicts.</p>
+      <pre>git clone https://github.com/davidcastilloc/rust-webview-vst-template.git my-audio-plugin
+cd my-audio-plugin
+
+# 1. Scaffold your new plugin crate (VST3 + CLAP + Standalone)
+cargo run --package xtask -- new-plugin --name "Lush Chorus" --vendor "MyStudio" --id "com.mystudio.lushchorus"
+
+# 2. Run the 4-Gate Architecture &amp; Contract Certification
+powershell -ExecutionPolicy Bypass -File scripts/audit_plugin_architecture.ps1
+
+# 3. Build Standalone .exe and VST3 / CLAP bundles
+cargo build --release -p lush_chorus --bin lush_chorus_app
+cargo run --package xtask -- bundle lush_chorus --release</pre>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      Open Audio Stack (`rust-webview-vst-template`) — Released under the MIT License. Built for Audio Engineers &amp; Vibe Coders.
+    </div>
+  </footer>
+
+  <script>
+    function setSkin(name, bg, accent, btn) {
+      document.querySelectorAll('.skin-pill').forEach(el => el.classList.remove('active'));
+      btn.classList.add('active');
+      const rack = document.getElementById('demo-rack');
+      rack.style.background = bg;
+      rack.style.color = name === 'minimal' ? '#11131a' : '#eef0f6';
+      rack.style.borderColor = accent;
+      rack.querySelectorAll('.knob-val').forEach(el => el.style.color = accent);
+      rack.querySelectorAll('input[type="range"]').forEach(el => el.style.accentColor = accent);
+    }
+    function updateKnob(input, unit) {
+      const prefix = unit === ' dB' && Number(input.value) > 0 ? '+' : '';
+      input.nextElementSibling.textContent = prefix + input.value + unit;
+    }
+    function copyText(id, btn) {
+      const text = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(text);
+      const old = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = old; }, 1600);
+    }
+  </script>
+</body>
+</html>

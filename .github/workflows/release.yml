@@ -1,0 +1,57 @@
+name: Semantic Release & Binary Distribution
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  semantic-release:
+    name: Certify, Bundle & Semantic Release
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run 4-Gate Certification Audit
+        shell: pwsh
+        run: ./scripts/audit_plugin_architecture.ps1
+
+      - name: Build Standalone & Bundle VST3/CLAP
+        run: |
+          cargo build --release -p studio_bus_comp --bin studio_bus_comp_app
+          cargo run --package xtask -- bundle studio_bus_comp --release
+
+      - name: Run Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx --yes -p semantic-release@24 `
+            -p @semantic-release/commit-analyzer@13 `
+            -p @semantic-release/release-notes-generator@14 `
+            -p @semantic-release/changelog@6 `
+            -p @semantic-release/exec@6 `
+            -p @semantic-release/git@10 `
+            -p @semantic-release/github@10 `
+            semantic-release

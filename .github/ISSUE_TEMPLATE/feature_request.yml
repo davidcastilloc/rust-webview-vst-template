@@ -1,0 +1,23 @@
+name: Propuesta de Nuevo Módulo DSP o Mejora del SDK
+description: Propón un nuevo filtro/efecto en dsp_core, un nuevo Hardware Skin o una mejora para todos los plugins del ecosistema
+title: "[Feat]: "
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área del Ecosistema
+      options:
+        - Nuevo algoritmo en crates/dsp_core (Filtro, Saturador, Reverb, FFT, Oversampling)
+        - Nuevo control o Skin en packages/base-plugin-ui (@audio-ui)
+        - Mejora de host en crates/base_plugin_webview o crates/base_plugin_core
+        - Nueva receta para Agentes IA / Vibe Coding (llms.txt / VIBE_CODING_PROMPTS.md)
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Especificación Técnica
+      placeholder: "Describe la API propuesta, garantizando 0 asignaciones de memoria en DspEngine::process()..."
+    validations:
+      required: true

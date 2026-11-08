@@ -1,0 +1,68 @@
+{
+  "branches": ["main"],
+  "plugins": [
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        "preset": "conventionalcommits",
+        "releaseRules": [
+          { "type": "feat", "release": "minor" },
+          { "type": "fix", "release": "patch" },
+          { "type": "perf", "release": "patch" },
+          { "type": "refactor", "release": "patch" },
+          { "breaking": true, "release": "major" }
+        ]
+      }
+    ],
+    [
+      "@semantic-release/release-notes-generator",
+      {
+        "preset": "conventionalcommits"
+      }
+    ],
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "cargo run --package xtask -- set-version ${nextRelease.version} && cargo check --workspace"
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": [
+          "CHANGELOG.md",
+          "Cargo.toml",
+          "Cargo.lock",
+          "crates/*/Cargo.toml",
+          "packages/base-plugin-ui/package.json"
+        ],
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "path": "target/bundled/studio_bus_comp.vst3/**",
+            "label": "StudioBusComp-VST3-Windows-x64"
+          },
+          {
+            "path": "target/bundled/studio_bus_comp.clap",
+            "label": "StudioBusComp-CLAP-Windows-x64.clap"
+          },
+          {
+            "path": "target/release/studio_bus_comp_app.exe",
+            "label": "StudioBusComp-Standalone-Windows-x64.exe"
+          }
+        ]
+      }
+    ]
+  ]
+}
